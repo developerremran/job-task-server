@@ -31,18 +31,64 @@ async function run() {
     await client.connect();
 
     const usersData = client.db('userData').collection('userCollection')
+    const TeamUsersData = client.db('TeamUsersDatauserData').collection('TeamUsersDataCollection')
+
+    // app.get('/users', async (req, res) => {
+    //   const body = req.body;
+    //   const search = req.query.search;
+    //   const query = { first_name: { $regex: new RegExp(search, 'i') } };
+    //   // console.log(search);
+    //   const result = await usersData.find(query, body).toArray()
+    //   res.send(result)
+    // })
 
     app.get('/users', async (req, res) => {
-      const body = req.body;
-      const search = req.query.search;
-      const query = { first_name: { $regex: new RegExp(search, 'i') } };
-      // console.log(search);
-      const result = await usersData.find(query, body).toArray()
+      const { domain, gender, availability, search } = req.query;
+      const query = {};
+
+      if (search) {
+        query.first_name = { $regex: new RegExp(search, 'i') };
+      }
+
+      if (domain) {
+        query.domain = { $in: domain.split(',') };
+      }
+
+      if (gender) {
+        query.gender = { $in: gender.split(',') };
+      }
+
+      if (availability) {
+        query.availability = { $in: availability.split(',') };
+      }
+
+      try {
+        const result = await usersData.find(query).toArray();
+        res.send(result);
+      } catch (error) {
+        console.error(error);
+        res.status(500).send('An error occurred while fetching users.');
+      }
+    });
+
+  app.post('/teamMember', async (req, res) => {
+    const user = req.body;
+    const email = req.query.email;
+    const query = { email: email };
+    const exit = await TeamUsersData.findOne(query)
+    if(exit){
+     return res.send('user already selected')
+    }
+    const result = await TeamUsersData.insertOne(user);
+    res.send(result);
+  });
+
+
+    app.get('/teamMember', async (req, res) => {
+      const body = req.body
+      const result = await TeamUsersData.find(body).toArray()
       res.send(result)
     })
-
-
-
 
 
 
