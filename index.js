@@ -12,7 +12,7 @@ app.use(express.json())
 
 // mongodb...
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.USER_N}:${process.env.SECRET_KEY}@cluster0.f4adszp.mongodb.net/?retryWrites=true&w=majority`;
 
 
@@ -33,14 +33,6 @@ async function run() {
     const usersData = client.db('userData').collection('userCollection')
     const TeamUsersData = client.db('TeamUsersDatauserData').collection('TeamUsersDataCollection')
 
-    // app.get('/users', async (req, res) => {
-    //   const body = req.body;
-    //   const search = req.query.search;
-    //   const query = { first_name: { $regex: new RegExp(search, 'i') } };
-    //   // console.log(search);
-    //   const result = await usersData.find(query, body).toArray()
-    //   res.send(result)
-    // })
 
     app.get('/users', async (req, res) => {
       const { domain, gender, availability, search } = req.query;
@@ -90,6 +82,20 @@ async function run() {
       res.send(result)
     })
 
+    // app.delete('/teamMember/:email', async(req, res)=>{
+    //   const email = req.query.email;
+    //   console.log(email);
+    //   const query = {email : email};
+    //   const result = await TeamUsersData.deleteOne(query)
+    //   res.send(result)
+    // })
+    app.delete('/teamMember/:email', async (req, res) => {
+      const email = req.params.email; // Use req.params instead of req.query
+      // console.log(email);
+      const query = { email: email };
+      const result = await TeamUsersData.deleteOne(query);
+      res.send(result);
+    });
 
 
 
